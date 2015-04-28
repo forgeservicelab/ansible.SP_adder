@@ -7,9 +7,6 @@
     connection: local
     ignore_errors: yes
 
-  - debug:
-      msg: "{{ md.keys() }}"
-
   - uri:
       url: https://idp.forgeservicelab.fi/admin/metadata-converter.php?
       method: POST
