@@ -1,0 +1,30 @@
+#!/usr/bin/python
+# -*- coding: utf-8 -*-
+
+try:
+    from bs4 import BeautifulSoup
+except ImportError:
+    print ("failed=True msg='beautifulsoup4 is required'")
+
+
+def _retrieve_metadata(module):
+    soup = BeautifulSoup(module.params['html'])
+    md = soup.findAll(name='pre', attrs={'class': 'metadatabox'})
+    if md:
+        module.exit_json(changed=False, metadata=md[0].text)
+    else:
+        module.fail_json(msg='No metadata found')
+
+
+def main():
+    module = AnsibleModule(
+        argument_spec=dict(
+            html=dict(required=True)
+        )
+    )
+
+    _retrieve_metadata(module)
+
+# This is magic, see Ansible docs.
+from ansible.module_utils.basic import *
+main()
