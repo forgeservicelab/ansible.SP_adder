@@ -1,12 +1,6 @@
 ---
 - hosts: all
   tasks:
-  - generate_metadata:
-      html: "{{ lookup('file', 'metadata.xml') }}"
-    register: md
-    connection: local
-    ignore_errors: yes
-
   - uri:
       url: https://idp.forgeservicelab.fi/admin/metadata-converter.php?
       method: POST
@@ -15,22 +9,20 @@
       return_content: yes
     register: result
     connection: local
-    when: md | failed
 
   - retrieve_metadata:
       html: "{{ result.content }}"
-    register: md2
+    register: md
     connection: local
-    when: md | failed
 
-  - shell: cat "{{ metadata_file }}" | grep -F "{{ (md2 if 'failed' in md.keys() else md).metadata.split('\n')[0] }}"
+  - shell: cat "{{ metadata_file }}" | grep -F "{{ md.metadata.split('\n')[0] }}"
     register: grep
     ignore_errors: true
     changed_when: false
 
   - lineinfile:
       dest: "{{ metadata_file }}"
-      line: "{{ (md2 if 'failed' in md.keys() else md).metadata }}"
+      line: "{{ md.metadata }}"
       insertafter: EOF
     when: grep.rc == 1
     sudo: true
